@@ -18,12 +18,12 @@ public class CompareDirectories {
     public static void main(String[] args) {
         List<String> filesFirstDirectory = new ArrayList<>();
         List<String> directoriesFirstDirectory = new ArrayList<>();
-        firstDirectory = "D:\\Internship\\root1\\";
+        firstDirectory = args[0]; //"D:\\Internship\\root1\\";
         listFiles(firstDirectory, filesFirstDirectory, directoriesFirstDirectory, firstDirectory);
 
         List<String> filesSecondDirectory = new ArrayList<>();
         List<String> directoriesSecondDirectory = new ArrayList<>();
-        secondDirectory = "D:\\Internship\\root2\\";
+        secondDirectory =  args[1]; //"D:\\Internship\\root2\\";
         listFiles(secondDirectory, filesSecondDirectory, directoriesSecondDirectory, secondDirectory);
 
         System.out.println("\nDiff [" + firstDirectory + "] [" + secondDirectory + "]");
@@ -83,6 +83,8 @@ public class CompareDirectories {
                                 break;
                             }
                         }
+                        br1.close();
+                        br2.close();
                     }
                 }
             }
