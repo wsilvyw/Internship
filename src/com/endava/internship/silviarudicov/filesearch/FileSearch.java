@@ -15,11 +15,11 @@ public class FileSearch {
         try {
 
             List<File> files = new ArrayList<File>();
-            listf("D:\\Internship",files);
+            listf(args[1],files); // "D:\\Internship"
 
             for (File file:files) {
                 try (BufferedReader bf = new BufferedReader(new FileReader(file))) {
-                    Pattern p = Pattern.compile("text in file", Pattern.CASE_INSENSITIVE);
+                    Pattern p = Pattern.compile(args[0], Pattern.CASE_INSENSITIVE); //"text in file"
                     String line;
                     int linecount = 0;
                     List<Integer> lines = new ArrayList<>();
@@ -34,8 +34,12 @@ public class FileSearch {
                     }
                     if(!lines.isEmpty()){
                         System.out.print(file.getAbsolutePath() + " lines(");
+                        boolean moreThanOne = false;
                         for (Integer nr: lines) {
-                            System.out.print(nr + " ");
+                            if(moreThanOne)
+                                System.out.print(",");
+                            System.out.print(nr);
+                            moreThanOne = true;
                         }
                         System.out.println(")");
                     }
