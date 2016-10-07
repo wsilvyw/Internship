@@ -1,12 +1,8 @@
 package com.endava.internship.silviarudicov.downloadviasocket;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * Created by srudicov on 10/6/2016.
@@ -14,40 +10,74 @@ import java.net.UnknownHostException;
 public class Download {
 
     public static void main(String[] args) throws IOException{
+        Socket socket = null;
+        PrintWriter out = null;
+        InputStream is = null;
+        OutputStream os = null;
 
-        Socket s = new Socket(InetAddress.getByName("i.imgur.com"), 80);
-        PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream())));
-                    // Socket class implements client sockets (also called just "sockets"). A socket is an endpoint for communication between two machines.
-                    // Socket(InetAddress address, int port) Creates a stream socket and connects it to the specified port number at the specified IP address.
-                    // InetAddress class represents an Internet Protocol (IP) address.
-                    //	getByName(String host) Determines the IP address(InetAddress) of a host, given the host's name
+        try {
+            String host = "i.imgur.com";
+            String fileAbsolutePath = "H1USigj.gif";
+            String outputFileAbsolutePath = "image.gif";
+            socket = new Socket(InetAddress.getByName(host), 80);
+            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())));
 
+            out.println("GET " + fileAbsolutePath + " HTTP/1.1"); //Prints a string
+            out.println("Host: " + host + "\r\n");
+            out.flush();  //Flushes the stream
 
-                    // PrintWriter - Prints formatted representations of objects to a text-output stream
-                    // BufferedWriter - Writes text to a character-output stream, buffering characters so as to provide for the efficient writing of single characters, arrays, and strings.
-                    // An OutputStreamWriter is a bridge from character streams to byte streams: Characters written to it are encoded into bytes using a specified charset.
+            is = socket.getInputStream();
+            os = new FileOutputStream(outputFileAbsolutePath);
 
-        //PrintWriter(Writer out)   Creates a new PrintWriter, without automatic line flushing.
-        //BufferedWriter(Writer out)  Creates a buffered character-output stream that uses a default-sized output buffer.
-        //OutputStreamWriter(OutputStream out)  Creates an OutputStreamWriter that uses the default character encoding.
+            boolean headerEnded = false;
+            //browsers have limits ranging on the 2048 character allowed in get method
+            byte[] bytes = new byte[2048];
+            byte[] searchBytes  = {13,10,13,10};
+/*
+            readAfter(is, searchBytes, data -> {
 
-        out.println("GET /H1USigj.gif HTTP/1.1"); //Prints a string
-        out.println("Host: i.imgur.com\r\n");
-        out.flush();  //Flushes the stream
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-
-        String inputLine;
-        //int count = 0;
-
-        while ((inputLine = in.readLine()) != null) {
-            //count++;
-            //System.out.println(count + " " + inputLine);
+            });
+*/
+            int length;
+            while ((length = is.read(bytes)) != -1) {
+                System.out.println("length=" + length);
+                // If the end of the header had already been reached, write the bytes to the file as normal.
+                if (headerEnded) {
+                    os.write(bytes, 0, length);
+                    os.flush();
+                }
+                // Locates the end of the header by comparing the current byte as well as the next 3 bytes
+                // with the HTTP header end "\r\n\r\n" (which in integer representation would be 13 10 13 10)
+                else {
+                    for (int i = 0; i < length; i++) {
+                        if (bytes[i] == 13 && bytes[i + 1] == 10 && bytes[i + 2] == 13 && bytes[i + 3] == 10) {
+                            System.out.println(i + "=i");
+                            headerEnded = true;
+                            os.write(bytes, i + 4, length - i - 4);
+                            os.flush();
+                            break;
+                        }
+                    }
+                }
+            }
+        }finally{
+            if(os != null)
+                os.close();
+            if(is != null)
+                is.close();
+            if(out != null)
+                out.close();
+            if(socket != null)
+                socket.close();
         }
-
-        out.close();
-        in.close();
-        s.close();
     }
+/*
+    public static void readAfter(InputStream in, byte[] searchBytes, StreamWriter sw) {
+        //sw.write(data);
+    }
+
+    interface StreamWriter {
+        void write(byte[] data);
+    }*/
 
 }
