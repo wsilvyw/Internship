@@ -43,11 +43,6 @@ public class MultithreadingServer implements Runnable{
                 }
                 throw new RuntimeException("Error accepting client connection", e);
             }
-            try {
-                System.out.println(clientSocket.getInputStream().toString());
-            }catch(IOException ioe){
-                System.out.println("Exception!!");
-            }
             this.threadPool.execute( new ClientSocket(clientSocket) );
         }
 
